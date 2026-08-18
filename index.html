@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prueba N°5 · Armadas y Trabajo con Agua</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root{
+    --navy:#1F2E3B;
+    --red:#E13A28;
+    --magenta:#B6205A;
+    --light:#F4F6F8;
+    --green:#1E8A4C;
+    --gray:#6b7480;
+    --border:#dfe4ea;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI', Arial, sans-serif;
+    background:linear-gradient(160deg, #eef1f4 0%, #e4e9ee 100%);
+    color:var(--navy);
+    min-height:100vh;
+    padding:24px 12px;
+  }
+  .wrap{max-width:760px;margin:0 auto;}
+  .header{
+    background:linear-gradient(120deg, var(--magenta), var(--red));
+    border-radius:16px 16px 0 0;
+    padding:26px 28px;
+    color:white;
+  }
+  .header .eyebrow{
+    font-size:12px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    opacity:.9;
+    font-weight:600;
+  }
+  .header h1{
+    margin:6px 0 4px 0;
+    font-size:26px;
+  }
+  .header p{margin:0;font-size:13.5px;opacity:.92;}
+  .card{
+    background:white;
+    border:1px solid var(--border);
+    border-top:none;
+    border-radius:0 0 16px 16px;
+    padding:28px;
+    box-shadow:0 8px 24px rgba(31,46,59,0.08);
+  }
+
+  /* Intro screen */
+  #intro-screen .intro-grid{
+    display:flex;
+    gap:24px;
+    align-items:flex-start;
+    flex-wrap:wrap;
+  }
+  #intro-screen .intro-text{flex:1;min-width:240px;}
+  #intro-screen ul{padding-left:18px;margin:14px 0;}
+  #intro-screen li{margin-bottom:6px;font-size:14.5px;}
+  .qr-box{
+    background:var(--light);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:16px;
+    text-align:center;
+    min-width:190px;
+  }
+  .qr-box p{font-size:12px;color:var(--gray);margin:8px 0 0 0;}
+  #qrcode{display:flex;justify-content:center;}
+  #qrcode img, #qrcode canvas{border-radius:6px;}
+
+  input[type=text]{
+    width:100%;
+    padding:11px 12px;
+    border:1px solid var(--border);
+    border-radius:8px;
+    font-size:14px;
+    margin-top:6px;
+  }
+  label.field-label{font-size:13px;font-weight:600;color:var(--navy);}
+
+  .btn{
+    background:var(--navy);
+    color:white;
+    border:none;
+    padding:13px 22px;
+    border-radius:9px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:opacity .15s;
+  }
+  .btn:hover{opacity:.88;}
+  .btn.secondary{
+    background:transparent;
+    color:var(--navy);
+    border:1.5px solid var(--navy);
+  }
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+
+  /* Progress bar */
+  .progress-wrap{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:22px;
+  }
+  .progress-track{
+    flex:1;
+    height:8px;
+    background:var(--border);
+    border-radius:6px;
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    background:linear-gradient(90deg, var(--magenta), var(--red));
+    width:0%;
+    transition:width .3s ease;
+  }
+  .progress-label{font-size:12.5px;color:var(--gray);font-weight:600;white-space:nowrap;}
+
+  .q-tag{
+    display:inline-block;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.5px;
+    text-transform:uppercase;
+    background:#EDEFF3;
+    color:var(--navy);
+    padding:3px 10px;
+    border-radius:20px;
+    margin-bottom:10px;
+  }
+  .q-text{
+    font-size:17px;
+    font-weight:600;
+    margin:0 0 18px 0;
+    line-height:1.4;
+  }
+  .option{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    border:1.5px solid var(--border);
+    border-radius:10px;
+    padding:13px 15px;
+    margin-bottom:10px;
+    cursor:pointer;
+    font-size:14.5px;
+    transition:all .12s;
+  }
+  .option:hover{border-color:var(--magenta);background:#fdf5f7;}
+  .option.selected{
+    border-color:var(--magenta);
+    background:#fdeef2;
+    font-weight:600;
+  }
+  .option input{margin-top:2px;}
+  .nav-row{
+    display:flex;
+    justify-content:space-between;
+    margin-top:24px;
+  }
+
+  /* Results screen */
+  #result-screen{display:none;text-align:center;}
+  .score-circle{
+    width:150px;height:150px;
+    border-radius:50%;
+    margin:10px auto 18px auto;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    color:white;
+  }
+  .score-circle .pct{font-size:34px;font-weight:800;}
+  .score-circle .frac{font-size:13px;opacity:.9;}
+  .pass{background:linear-gradient(135deg,#1E8A4C,#2FA860);}
+  .fail{background:linear-gradient(135deg,#C0392B,#E5533F);}
+  .result-title{font-size:22px;font-weight:800;margin:6px 0 2px 0;}
+  .result-sub{color:var(--gray);font-size:14px;margin-bottom:22px;}
+  .review{text-align:left;margin-top:26px;}
+  .review-item{
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:14px 16px;
+    margin-bottom:10px;
+    font-size:13.5px;
+  }
+  .review-item.correct{border-left:5px solid var(--green);}
+  .review-item.wrong{border-left:5px solid var(--red);}
+  .review-q{font-weight:700;margin-bottom:6px;}
+  .review-line{margin:3px 0;}
+  .tag-ok{color:var(--green);font-weight:700;}
+  .tag-bad{color:var(--red);font-weight:700;}
+
+  #quiz-screen{display:none;}
+  .name-banner{
+    font-size:12.5px;
+    color:var(--gray);
+    margin-bottom:16px;
+  }
+  footer{
+    text-align:center;
+    font-size:11.5px;
+    color:var(--gray);
+    margin-top:16px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="eyebrow">Academia Nacional de Bomberos de Chile</div>
+    <h1>Prueba de Entrenamiento N°5</h1>
+    <p>Armadas y Trabajo con Agua — 15 preguntas · nivel avanzado · aprobación 70%</p>
+  </div>
+
+  <div class="card">
+
+    <!-- INTRO -->
+    <div id="intro-screen">
+      <div class="intro-grid">
+        <div class="intro-text">
+          <label class="field-label">Nombre y compañía (opcional)</label>
+          <input type="text" id="participant-name" placeholder="Ej: Juan Pérez — 8ª Compañía">
+
+          <ul>
+            <li>15 preguntas de alternativas, contenido avanzado de la Guía N°5.</li>
+            <li>Corrección automática al finalizar.</li>
+            <li>Necesitas <b>70% o más</b> (11/15) para aprobar.</li>
+            <li>Al terminar verás tu puntaje y la revisión de cada respuesta.</li>
+          </ul>
+          <button class="btn" onclick="startQuiz()">Comenzar prueba</button>
+        </div>
+
+        <div class="qr-box">
+          <div id="qrcode"></div>
+          <p>Escanea para acceder desde tu celular</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUIZ -->
+    <div id="quiz-screen">
+      <div class="name-banner" id="name-banner"></div>
+      <div class="progress-wrap">
+        <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+        <div class="progress-label" id="progress-label">1 / 15</div>
+      </div>
+      <div class="q-tag" id="q-tag">PREGUNTA 1</div>
+      <p class="q-text" id="q-text"></p>
+      <div id="options-container"></div>
+      <div class="nav-row">
+        <button class="btn secondary" id="btn-prev" onclick="prevQuestion()">Anterior</button>
+        <button class="btn" id="btn-next" onclick="nextQuestion()">Siguiente</button>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div id="result-screen">
+      <div class="score-circle" id="score-circle">
+        <div class="pct" id="score-pct">0%</div>
+        <div class="frac" id="score-frac">0/15</div>
+      </div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-sub" id="result-sub"></div>
+      <button class="btn secondary" onclick="restartQuiz()">Reintentar prueba</button>
+
+      <div class="review" id="review-container"></div>
+    </div>
+
+  </div>
+  <footer>Basado en la Guía de Entrenamiento N°5 · Armadas y Trabajo con Agua — Academia Nacional de Bomberos de Chile</footer>
+</div>
+
+<script>
+const questions = [
+  {
+    q: "Según la guía, ¿a qué temperatura el agua alcanza la máxima expresión de su capacidad de absorción de calor al transformarse en vapor?",
+    options: ["0 °C", "100 °C", "212 °C", "50 °C"],
+    correct: 1
+  },
+  {
+    q: "Un incendio de petróleo derramado en el mar sigue ardiendo en superficie aunque se aplique agua. ¿Cuál es la explicación correcta según el concepto de densidad?",
+    options: [
+      "El petróleo es menos denso que el agua, por lo que flota y continúa ardiendo en superficie",
+      "El agua se evapora instantáneamente al contacto con el petróleo",
+      "El petróleo es más denso que el agua, por lo que se hunde y arde bajo la superficie",
+      "La salinidad del mar impide que el agua absorba calor"
+    ],
+    correct: 0
+  },
+  {
+    q: "¿Cuál es la densidad específica del agua mencionada en la guía, y qué ocurre con ese valor al aumentar la temperatura?",
+    options: [
+      "1 g/cm³, y aumenta con la temperatura",
+      "1 g/cm³, y disminuye con la temperatura",
+      "0,5 g/cm³, y se mantiene constante",
+      "1,5 g/cm³, y disminuye con la temperatura"
+    ],
+    correct: 1
+  },
+  {
+    q: "De los siguientes factores, ¿cuál NO figura entre los que afectan la pérdida de presión según la guía?",
+    options: ["La altura", "El diámetro de la manguera", "El color de la manguera", "Los roces y cambios de dirección"],
+    correct: 2
+  },
+  {
+    q: "Respecto a la relación entre diámetro y presión, ¿cuál afirmación es correcta?",
+    options: [
+      "A mayor diámetro, mayor pérdida de presión",
+      "A menor diámetro, mayor pérdida de presión",
+      "El diámetro no influye en la pérdida de presión",
+      "A menor diámetro, menor resistencia y mayor caudal"
+    ],
+    correct: 1
+  },
+  {
+    q: "Un pitón regulable está configurado a 90 galones por minuto (gpm) a 7 bar de presión. ¿A cuántos litros por minuto (lpm) equivale aproximadamente?",
+    options: ["90 lpm", "180 lpm", "360 lpm", "450 lpm"],
+    correct: 2
+  },
+  {
+    q: "Según la tabla de caudal por diámetro de manguera, ¿cuál es el caudal aproximado que puede desalojar una línea de 52 mm (2 pulgadas)?",
+    options: ["Hasta 500 lpm", "Hasta 750 lpm", "Hasta 1000 lpm", "Hasta 1400 lpm"],
+    correct: 2
+  },
+  {
+    q: "Según la tabla de equivalencias, 1 bar se redondea a:",
+    options: ["10 psi", "14,504 psi exactos sin redondear", "15 psi", "20 psi"],
+    correct: 2
+  },
+  {
+    q: "¿Qué tipo de unión se utiliza en Chile para acoplar mangueras entre sí y a otras conexiones (cuerpo bomba, red seca, grifos)?",
+    options: ["Unión NPT", "Unión tipo Storz", "Unión BSP", "Unión Camlock"],
+    correct: 1
+  },
+  {
+    q: "¿Cuál es la diferencia clave entre una armada simple y una armada mixta?",
+    options: [
+      "La armada simple usa mangueras de distinto diámetro; la mixta de igual diámetro",
+      "La armada simple es una sola línea desde la bomba al pitón; la mixta usa gemelos o trifurcas para armar varios pitones desde una línea de alimentación",
+      "La armada mixta solo se usa en incendios pequeños sin riesgo de propagación",
+      "No existe diferencia, son sinónimos"
+    ],
+    correct: 1
+  },
+  {
+    q: "Sobre la armada doble, ¿cuál enunciado es correcto?",
+    options: [
+      "Se realiza con una sola manguera de 38 mm alimentando dos consumos distintos",
+      "Se realiza con dos mangueras de 75 mm que alimentan un solo consumo y requiere alimentación por convoy o sistema de abastecimiento",
+      "Es la misma que la armada simple pero con pitón monitor",
+      "Se usa exclusivamente para fuegos de menor magnitud"
+    ],
+    correct: 1
+  },
+  {
+    q: "¿Cuál es el desalojo mínimo nominal exigido por normativa (NCh 691:2015) para un grifo de incendio?",
+    options: ["8 l/s (480 lpm)", "16 l/s (960 lpm)", "25 l/s (1500 lpm)", "5 l/s (300 lpm)"],
+    correct: 1
+  },
+  {
+    q: "Al usar la llave de grifo para abrir un grifo de incendio, ¿hacia qué dirección se debe girar?",
+    options: ["Hacia la derecha", "Hacia la izquierda", "En cualquier dirección, no importa", "Depende del fabricante, nunca de la dirección"],
+    correct: 1
+  },
+  {
+    q: "Si el anillo de un grifo se encuentra pintado de color verde, ¿qué indica respecto a la apertura de la matriz?",
+    options: [
+      "Que la matriz está fuera de servicio",
+      "Que la matriz se abre hacia la izquierda",
+      "Que la matriz se abre hacia la derecha",
+      "Que se requiere llave de seguridad especial"
+    ],
+    correct: 2
+  },
+  {
+    q: "¿Qué patrón de agua NO debe utilizarse para la extinción y se usa exclusivamente como protección del bombero frente a fugas de gas encendidas o fuego vivo en espacios abiertos?",
+    options: ["Chorro de enfriamiento o pleno", "Cono de poder", "Cono de protección (neblina o cortina de agua)", "Chorro compacto de largo alcance"],
+    correct: 2
+  },
+  {
+    q: "Para un ataque ofensivo, la guía recomienda trabajar con al menos 7 personas. ¿Cuál de las siguientes NO es una de las funciones mencionadas explícitamente?",
+    options: [
+      "Comandante del incidente (CI)",
+      "Pareja de ataque o extinción",
+      "Pareja de búsqueda y rescate",
+      "Operador exclusivo de pitón monitor portátil"
+    ],
+    correct: 3
+  },
+  {
+    q: "Antes de ingresar a una estructura en un ataque ofensivo, ¿qué procedimiento de testeo de temperatura se recomienda?",
+    options: [
+      "Lanzar 1 chorro de enfriamiento al piso cada 10 metros",
+      "Lanzar 3 chorros de enfriamiento hacia la parte superior en aproximadamente 45°, repitiendo cada 5 metros y/o cuando sea necesario",
+      "Aplicar cono de protección de forma continua durante todo el ingreso",
+      "No es necesario testear temperatura si se usa EPP completo"
+    ],
+    correct: 1
+  },
+  {
+    q: "El ataque transicional combina dos enfoques. ¿Cuáles son?",
+    options: [
+      "Ataque ofensivo seguido de ataque defensivo",
+      "Aplicación inicial de agua desde el exterior (defensivo) seguida de ingreso con línea de ataque al interior (ofensivo)",
+      "Uso exclusivo de pitones monitores desde escala mecánica",
+      "Combinación de agua y espuma en la misma línea"
+    ],
+    correct: 1
+  },
+  {
+    q: "Ante un incendio de gran magnitud en fase de libre combustión con riesgo de colapso, ¿qué tipo de ataque y herramienta se recomienda priorizar?",
+    options: [
+      "Ataque ofensivo con búsqueda primaria inmediata",
+      "Ataque defensivo, priorizando pitones monitores desde una distancia segura y mayor caudal",
+      "Ataque transicional con ingreso inmediato tras 3 segundos de enfriamiento",
+      "Ataque simple con manguerín semirrígido de 25 mm"
+    ],
+    correct: 1
+  },
+  {
+    q: "Respecto a las consideraciones de seguridad al presurizar una línea de agua, ¿qué postura corporal se recomienda para evitar caídas por pérdida de estabilidad?",
+    options: [
+      "Piernas juntas y rodillas bloqueadas",
+      "Una pierna delante de la otra, en posición estable",
+      "Sentado sobre la manguera",
+      "De espaldas al pitonero para mayor tracción"
+    ],
+    correct: 1
+  }
+];
+
+// Nota: se generaron 20 ítems para dar profundidad; se usarán los primeros 15 activos.
+const activeQuestions = questions.slice(0, 15);
+let current = 0;
+let answers = new Array(activeQuestions.length).fill(null);
+
+// ====== CONFIGURACIÓN DE REGISTRO EN GOOGLE SHEETS ======
+// Pega aquí la URL de tu Web App de Apps Script (ver instrucciones entregadas aparte).
+// Si se deja vacío, la prueba funciona igual pero no queda registro en la planilla.
+const GOOGLE_SCRIPT_URL = "";
+
+// QR code pointing to the current page URL so it can be scanned to open the quiz
+try {
+  new QRCode(document.getElementById("qrcode"), {
+    text: window.location.href,
+    width: 140,
+    height: 140,
+    colorDark: "#1F2E3B",
+    colorLight: "#ffffff"
+  });
+} catch(e) {
+  document.getElementById("qrcode").innerHTML = "<p style='font-size:11px;color:#999;'>QR disponible al publicar el enlace</p>";
+}
+
+function startQuiz(){
+  const name = document.getElementById('participant-name').value.trim();
+  document.getElementById('name-banner').textContent = name ? ("Participante: " + name) : "";
+  document.getElementById('intro-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const q = activeQuestions[current];
+  document.getElementById('q-tag').textContent = "PREGUNTA " + (current+1);
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('progress-label').textContent = (current+1) + " / " + activeQuestions.length;
+  document.getElementById('progress-fill').style.width = (((current+1)/activeQuestions.length)*100) + "%";
+
+  const container = document.getElementById('options-container');
+  container.innerHTML = "";
+  q.options.forEach((opt, idx) => {
+    const div = document.createElement('div');
+    div.className = 'option' + (answers[current] === idx ? ' selected' : '');
+    div.onclick = () => selectOption(idx);
+    div.innerHTML = `<input type="radio" name="opt" ${answers[current]===idx?'checked':''} readonly> <span>${opt}</span>`;
+    container.appendChild(div);
+  });
+
+  document.getElementById('btn-prev').disabled = (current === 0);
+  document.getElementById('btn-next').textContent = (current === activeQuestions.length - 1) ? "Finalizar prueba" : "Siguiente";
+}
+
+function selectOption(idx){
+  answers[current] = idx;
+  renderQuestion();
+}
+
+function prevQuestion(){
+  if(current > 0){ current--; renderQuestion(); }
+}
+
+function nextQuestion(){
+  if(answers[current] === null){
+    alert("Selecciona una alternativa antes de continuar.");
+    return;
+  }
+  if(current < activeQuestions.length - 1){
+    current++;
+    renderQuestion();
+  } else {
+    showResults();
+  }
+}
+
+function showResults(){
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('result-screen').style.display = 'block';
+
+  let correctCount = 0;
+  activeQuestions.forEach((q, i) => { if(answers[i] === q.correct) correctCount++; });
+
+  const pct = Math.round((correctCount / activeQuestions.length) * 100);
+  const passed = pct >= 70;
+
+  const circle = document.getElementById('score-circle');
+  circle.className = 'score-circle ' + (passed ? 'pass' : 'fail');
+  document.getElementById('score-pct').textContent = pct + "%";
+  document.getElementById('score-frac').textContent = correctCount + "/" + activeQuestions.length;
+  document.getElementById('result-title').textContent = passed ? "✔ APROBADO" : "✘ REPROBADO";
+  document.getElementById('result-sub').textContent = passed
+    ? "Superaste el umbral de aprobación (70%). ¡Buen trabajo!"
+    : "No alcanzaste el umbral de aprobación (70%). Se recomienda repasar la Guía N°5 y reintentar.";
+
+  sendResultToSheet(correctCount, activeQuestions.length, pct, passed);
+
+  const review = document.getElementById('review-container');
+  review.innerHTML = "<h3 style='margin-top:0;'>Revisión de respuestas</h3>";
+  activeQuestions.forEach((q, i) => {
+    const isCorrect = answers[i] === q.correct;
+    const div = document.createElement('div');
+    div.className = 'review-item ' + (isCorrect ? 'correct' : 'wrong');
+    div.innerHTML = `
+      <div class="review-q">${i+1}. ${q.q}</div>
+      <div class="review-line">Tu respuesta: <b>${q.options[answers[i]]}</b> ${isCorrect ? '<span class="tag-ok">✔ Correcta</span>' : '<span class="tag-bad">✘ Incorrecta</span>'}</div>
+      ${!isCorrect ? `<div class="review-line">Respuesta correcta: <b>${q.options[q.correct]}</b></div>` : ''}
+    `;
+    review.appendChild(div);
+  });
+}
+
+function sendResultToSheet(correctCount, total, pct, passed){
+  if(!GOOGLE_SCRIPT_URL){ return; } // no configurado aún
+
+  const statusEl = document.createElement('div');
+  statusEl.id = 'save-status';
+  statusEl.style.cssText = 'font-size:12px;color:#6b7480;margin-top:10px;';
+  statusEl.textContent = 'Guardando resultado...';
+  document.getElementById('result-sub').insertAdjacentElement('afterend', statusEl);
+
+  const payload = {
+    nombre: document.getElementById('participant-name').value.trim() || 'Sin nombre',
+    prueba: 'Guía N°5 - Armadas y Trabajo con Agua',
+    correctas: correctCount,
+    total: total,
+    porcentaje: pct,
+    resultado: passed ? 'APROBADO' : 'REPROBADO',
+    fecha: new Date().toISOString()
+  };
+
+  fetch(GOOGLE_SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).then(() => {
+    statusEl.textContent = '✔ Resultado guardado en la planilla';
+  }).catch(() => {
+    statusEl.textContent = '⚠ No se pudo guardar el resultado (revisa conexión)';
+  });
+}
+
+function restartQuiz(){
+  current = 0;
+  answers = new Array(activeQuestions.length).fill(null);
+  document.getElementById('result-screen').style.display = 'none';
+  document.getElementById('intro-screen').style.display = 'block';
+}
+</script>
+</body>
+</html>
